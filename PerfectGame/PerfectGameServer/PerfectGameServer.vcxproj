@@ -139,7 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\PerfectGameClient\UdpSocket.cpp" />
     <ClCompile Include="server.cpp" />
+    <ClCompile Include="UdpListener.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="UdpListener.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,28 +1,38 @@
 #include "UdpSocket.h"
 #include <stdexcept>
 
-UdpSocket::UdpSocket(std::string const& ip_addr, u_short port)
+std::string UdpSocket::throwWsaError(std::string const& msg)
+{
+	throw std::runtime_error(msg + std::to_string(WSAGetLastError()));
+}
+
+UdpSocket::UdpSocket()
 {
 	// initialize winsock
 	if (WSAStartup(MAKEWORD(2, 2), &_wsa) != 0)
-	{
-		std::string error_msg = std::string("Failed. Error Code : ") 
-								+ std::to_string(WSAGetLastError());
-		throw std::runtime_error(error_msg);
-	}
+		throwWsaError("Failed. Error Code : ");
 
 	// create socket
 	if ((_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR)
-	{
-		std::string error_msg = std::string("socket() failed with error code : ")
-			+ std::to_string(WSAGetLastError());
-		throw std::runtime_error(error_msg);;
-	}
+		throwWsaError("socket() failed with error code : ");
+}
 
+UdpSocket::UdpSocket(sockaddr_in const& addr_info) : UdpSocket()
+{
+	_addr = addr_info;
+}
+
+UdpSocket::UdpSocket(std::string const& ip_addr, u_short port) : UdpSocket()
+{
 	// setup address structure
 	_addr.sin_family = AF_INET;
 	_addr.sin_port = htons(port);
 	InetPton(AF_INET, ip_addr.c_str(), &_addr.sin_addr.s_addr);
+}
+
+UdpSocket::UdpSocket(UdpSocket const& sock) : UdpSocket()
+{
+	_addr = sock._addr;
 }
 
 UdpSocket::~UdpSocket()
