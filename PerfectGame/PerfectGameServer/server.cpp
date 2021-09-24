@@ -17,8 +17,6 @@ size_t const kPort = 8888;
 int main()
 {
 	std::unique_ptr<UdpListener> sock_listen;
-	std::string message;
-
 	try
 	{
 		sock_listen = std::make_unique<UdpListener>(kIpAddr, kPort);
@@ -49,7 +47,7 @@ int main()
 		std::cout << "Received data : " << msg << "\n";
 
 		// now reply the client with the same data
-		if (sock->send(message) != 0)
+		if (sock->send(msg) != 0)
 		{
 			std::cout << "Failed to send\n";
 			exit(EXIT_FAILURE);

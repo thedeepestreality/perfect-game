@@ -44,8 +44,9 @@ UdpSocket::~UdpSocket()
 int UdpSocket::recv(std::string& result)
 {
 	memset(_buffer, '\0', _kBufferSize);
+	sockaddr_in recv_addr;
 	//try to receive some data, this is a blocking call
-	if (recvfrom(_socket, _buffer, _kBufferSize, 0, (sockaddr*)&_addr, &_addr_sz) == SOCKET_ERROR)
+	if (recvfrom(_socket, _buffer, _kBufferSize, 0, (sockaddr*)&recv_addr, &_addr_sz) == SOCKET_ERROR)
 		return WSAGetLastError();
 	result = std::string(_buffer);
 	return 0;
