@@ -7,6 +7,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PerfectGameServer", "Perfec
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PerfectGameClient", "PerfectGameClient\PerfectGameClient.vcxproj", "{C8FE0E6D-87CA-42F9-B768-14432BF390E5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameState", "GameState\GameState.vcxproj", "{5865C44D-DE4D-41A3-BE32-6F090ED98257}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameManager", "GameManager\GameManager.vcxproj", "{2F04B52B-2D65-4690-9F95-E257752B3043}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +35,22 @@ Global
 		{C8FE0E6D-87CA-42F9-B768-14432BF390E5}.Release|x64.Build.0 = Release|x64
 		{C8FE0E6D-87CA-42F9-B768-14432BF390E5}.Release|x86.ActiveCfg = Release|Win32
 		{C8FE0E6D-87CA-42F9-B768-14432BF390E5}.Release|x86.Build.0 = Release|Win32
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Debug|x64.ActiveCfg = Debug|x64
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Debug|x64.Build.0 = Debug|x64
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Debug|x86.ActiveCfg = Debug|Win32
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Debug|x86.Build.0 = Debug|Win32
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Release|x64.ActiveCfg = Release|x64
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Release|x64.Build.0 = Release|x64
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Release|x86.ActiveCfg = Release|Win32
+		{5865C44D-DE4D-41A3-BE32-6F090ED98257}.Release|x86.Build.0 = Release|Win32
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Debug|x64.ActiveCfg = Debug|x64
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Debug|x64.Build.0 = Debug|x64
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Debug|x86.ActiveCfg = Debug|Win32
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Debug|x86.Build.0 = Debug|Win32
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Release|x64.ActiveCfg = Release|x64
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Release|x64.Build.0 = Release|x64
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Release|x86.ActiveCfg = Release|Win32
+		{2F04B52B-2D65-4690-9F95-E257752B3043}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
