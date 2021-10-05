@@ -41,21 +41,20 @@ UdpSocket::~UdpSocket()
 	WSACleanup();
 }
 
-int UdpSocket::recv(std::string& result)
+int UdpSocket::recv(char* result, size_t& sz)
 {
-	memset(_buffer, '\0', _kBufferSize);
+	//memset(_buffer, '\0', _kBufferSize);
+	memset(result, '\0', sz);
 	sockaddr_in recv_addr;
 	//try to receive some data, this is a blocking call
-	if (recvfrom(_socket, _buffer, _kBufferSize, 0, (sockaddr*)&recv_addr, &_addr_sz) == SOCKET_ERROR)
+	if (sz = recvfrom(_socket, result, sz, 0, (sockaddr*)&recv_addr, &_addr_sz) == SOCKET_ERROR)
 		return WSAGetLastError();
-	result = std::string(_buffer);
 	return 0;
 }
 
-int UdpSocket::send(std::string const& message)
+int UdpSocket::send(char const* msg, size_t sz)
 {
-	char const* msg_buff = message.c_str();
-	if (sendto(_socket, msg_buff, strlen(msg_buff), 0, (sockaddr*)&_addr, _addr_sz) == SOCKET_ERROR)
+	if (sendto(_socket, msg, sz, 0, (sockaddr*)&_addr, _addr_sz) == SOCKET_ERROR)
 		return WSAGetLastError();
 	return 0;
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include "UdpSocket.h"
+#include "../GameState/GameState.h"
 
 //Winsock Library
 #pragma comment(lib,"ws2_32.lib")
@@ -12,11 +13,14 @@
 std::string const kIpAddr = "127.0.0.1";
 //The port on which to listen for incoming data
 u_short const kPort = 8888;
+size_t const kBufferSize = 512;
+char buffer[kBufferSize];
 
 int main()
 {
 	std::unique_ptr<UdpSocket> sock_ptr;
-	std::string message;
+	std::string message = "ping";
+	GameState state;
 
 	try
 	{
@@ -29,27 +33,31 @@ int main()
 	}
 
 	//start communication
-	while (1)
-	{
-		std::cout<<"Enter message : ";
-		std::cin >> message;
+	//while (1)
+	//{
+		//std::cout<<"Enter message : ";
+		//std::cin >> message;
 
 		//send the message
-		if (sock_ptr->send(message) != 0)
+		if (sock_ptr->send(message.c_str(), message.length()) != 0)
 		{
 			std::cout << "Failed to send\n";
 			exit(EXIT_FAILURE);
 		}
 
+		std::cout << "request sent\n";
+
 		//receive a reply and print it
-		if (sock_ptr->recv(message) != 0)
+		size_t sz = kBufferSize;
+		if (sock_ptr->recv(buffer, sz) != 0)
 		{
 			std::cout << "Failed to recv\n";
 			exit(EXIT_FAILURE);
 		}
 
-		std::cout << "Receive msg: " << message << "\n";
-	}
+		std::cout << "Received game state: " << sz << "\n";
+		state.deserialize(buffer, sz);
+	//}
 
 	return 0;
 }

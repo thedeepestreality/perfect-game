@@ -47,7 +47,7 @@ int main()
 		std::cout << "Received data : " << msg << "\n";
 
 		// now reply the client with the same data
-		if (sock->send(msg) != 0)
+		if (sock->send(msg.c_str(), msg.length()) != 0)
 		{
 			std::cout << "Failed to send\n";
 			exit(EXIT_FAILURE);

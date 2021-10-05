@@ -24,6 +24,7 @@ public:
         _map.push_back(gr_layer);
 
         _players["player"] = PlayerPos(1, 0);
+        _players["gamer"] = PlayerPos(2, 3);
     }
 
     void setPlayerPos(std::string const& name, PlayerPos const& pos)
@@ -31,7 +32,7 @@ public:
         _players[name] = pos;
     }
 
-    bool serialize(char* buffer, size_t const kSize)
+    bool serialize(char* buffer, size_t& sz)
     {
         size_t const kGameIdxSz = sizeof(GameIdx);
         size_t player_size = 0;
@@ -43,8 +44,9 @@ public:
         size_t const kGameSize = 2 * kGameIdxSz
             + _rows * _cols * kGameIdxSz
             + kGameIdxSz + player_size;
-        if (kGameSize > kSize)
+        if (kGameSize > sz)
             return false;
+        sz = kGameSize;
         buffer[0] = _rows;
         buffer[1] = _cols;
         size_t out_idx = 2;
@@ -61,5 +63,27 @@ public:
             buffer[out_idx++] = playerPos.second.first;
             buffer[out_idx++] = playerPos.second.second;
         }
+        return true;
+    }
+    bool deserialize(char const* buffer, size_t const kSize)
+    {
+        _rows = buffer[0];
+        _cols = buffer[1];
+        size_t in_idx = 2;
+        for (GameIdx row = 0; row < _rows; ++row)
+            for (GameIdx col = 0; col < _cols; ++col)
+                _map[row][col] = (Block)buffer[in_idx++];
+        GameIdx const kPlayerSz = buffer[in_idx++];
+        _players.clear();
+        for (GameIdx idx = 0; idx < kPlayerSz; ++idx)
+        {
+            std::string const kPlayerId(buffer+in_idx);
+            size_t const kStrSz = kPlayerId.length() + 1;
+            in_idx += kStrSz;
+            GameIdx const kX = buffer[in_idx++];
+            GameIdx const kY = buffer[in_idx++];
+            _players[kPlayerId] = PlayerPos(kX, kY);
+        }
+        return true;
     }
 };

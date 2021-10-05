@@ -15,6 +15,10 @@ UdpListener::UdpListener(std::string const& ip_addr, u_short port)
 	if ((_socket = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
 		throwWsaError("Could not create socket : ");
 
+	unsigned long ul = 1;
+	if (ioctlsocket(_socket, FIONBIO, &ul) == SOCKET_ERROR)
+		throwWsaError("Could not set non-blocking mode");
+
 	// Prepare the sockaddr_in structure
 	_addr.sin_family = AF_INET;
 	_addr.sin_port = htons(port);
