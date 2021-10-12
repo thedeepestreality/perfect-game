@@ -44,3 +44,13 @@ UdpSocket UdpListener::recv(std::string& result)
 	result = std::string(_buffer);
 	return UdpSocket(_from_addr);
 }
+
+UdpSocket UdpListener::recv(char* result, size_t& sz)
+{
+	memset(result, '\0', sz);
+	sockaddr_in recv_addr;
+	//try to receive some data, this is a blocking call
+	if ((sz = recvfrom(_socket, result, sz, 0, (sockaddr*)&recv_addr, &_addr_sz)) == SOCKET_ERROR)
+		throwWsaError("Failed recv from socket, error code: ");
+	return UdpSocket(recv_addr);
+}

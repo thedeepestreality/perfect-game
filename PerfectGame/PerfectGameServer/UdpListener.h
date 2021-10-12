@@ -22,4 +22,5 @@ public:
     UdpListener(std::string const& ip_addr = "127.0.0.1", u_short port = 8888);
     ~UdpListener();
     UdpSocket recv(std::string& result);
+    UdpSocket recv(char* result, size_t& sz);
 };

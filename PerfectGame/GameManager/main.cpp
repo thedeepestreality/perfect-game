@@ -44,7 +44,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 	std::cout << "Bind done\n";
-	std::string msg;
+	std::string player_name;
 	std::unique_ptr<UdpSocket> sock;
 	// keep listening for data
 	while (1)
@@ -52,8 +52,9 @@ int main()
 		std::cout << "\nWaiting for data...\n";
 		try
 		{
-			sock = std::make_unique<UdpSocket>(sock_listen->recv(msg));
-			std::cout << "Received data : " << msg << "\n";
+			sock = std::make_unique<UdpSocket>(sock_listen->recv(player_name));
+			std::cout << "Received data : " << player_name << "\n";
+			game.setPlayerPos(player_name, GameState::PlayerPos(1, 1));
 			break;
 		}
 		catch (std::exception const& err)
@@ -64,17 +65,39 @@ int main()
 		sleep(1e6);
 	}
 
-	//while(1)
-	//{
-	size_t sz = kBufSize;
-	game.serialize(buf, sz);
-	// now reply the client with the same data
-	if (sock->send(buf, sz) != 0)
+	while(1)
 	{
-		std::cout << "Failed to send\n";
-		exit(EXIT_FAILURE);
+		size_t sz = kBufSize;
+		game.serialize(buf, sz);
+		// now reply the client with the same data
+		if (sock->send(buf, sz) != 0)
+		{
+			std::cout << "Failed to send\n";
+			exit(EXIT_FAILURE);
+		}
+
+		try
+		{
+			sz = kBufSize;
+			sock = std::make_unique<UdpSocket>(sock_listen->recv(buf, sz));
+			std::cout << "Received data : " << player_name << "\n";
+		}
+		catch (std::exception const& err)
+		{
+			std::cout << "Socket recv error : " << err.what() << "\n";
+			continue;
+			//exit(EXIT_FAILURE);
+		}
+		if (sz > 0)
+		{
+			player_name = std::string(buf);
+			size_t str_sz = player_name.length();
+			GameState::GameIdx player_x = buf[str_sz + 1];
+			GameState::GameIdx player_y = buf[str_sz + 2];
+			game.setPlayerPos(player_name, GameState::PlayerPos(player_x, player_y));
+		}
+		sleep(1e6);
 	}
-	//}
 
     return 0;
 }

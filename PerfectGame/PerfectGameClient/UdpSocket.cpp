@@ -47,7 +47,7 @@ int UdpSocket::recv(char* result, size_t& sz)
 	memset(result, '\0', sz);
 	sockaddr_in recv_addr;
 	//try to receive some data, this is a blocking call
-	if (sz = recvfrom(_socket, result, sz, 0, (sockaddr*)&recv_addr, &_addr_sz) == SOCKET_ERROR)
+	if ((sz = recvfrom(_socket, result, sz, 0, (sockaddr*)&recv_addr, &_addr_sz)) == SOCKET_ERROR)
 		return WSAGetLastError();
 	return 0;
 }

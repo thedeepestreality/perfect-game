@@ -19,7 +19,7 @@ char buffer[kBufferSize];
 int main()
 {
 	std::unique_ptr<UdpSocket> sock_ptr;
-	std::string message = "ping";
+	std::string name = "ping";
 	GameState state;
 
 	try
@@ -33,20 +33,16 @@ int main()
 	}
 
 	//start communication
-	//while (1)
-	//{
-		//std::cout<<"Enter message : ";
-		//std::cin >> message;
+	//send the message
+	if (sock_ptr->send(name.c_str(), name.length()) != 0)
+	{
+		std::cout << "Failed to send\n";
+		exit(EXIT_FAILURE);
+	}
 
-		//send the message
-		if (sock_ptr->send(message.c_str(), message.length()) != 0)
-		{
-			std::cout << "Failed to send\n";
-			exit(EXIT_FAILURE);
-		}
-
-		std::cout << "request sent\n";
-
+	std::cout << "request sent\n";
+	while (1)
+	{
 		//receive a reply and print it
 		size_t sz = kBufferSize;
 		if (sock_ptr->recv(buffer, sz) != 0)
@@ -57,7 +53,19 @@ int main()
 
 		std::cout << "Received game state: " << sz << "\n";
 		state.deserialize(buffer, sz);
-	//}
+		GameState::PlayerPos curr_pos = state.getPlayerPos(name);
+		std::cout << "Received player pos: (";
+		std::cout << (int)curr_pos.first << "," << (int)curr_pos.second << ")\n";
+		++curr_pos.second;
+		sz = kBufferSize;
+		state.serialize_player(buffer, sz, name, curr_pos);
+
+		if (sock_ptr->send(buffer, sz) != 0)
+		{
+			std::cout << "Failed to send pos\n";
+			exit(EXIT_FAILURE);
+		}
+	}
 
 	return 0;
 }

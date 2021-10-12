@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\GameState\GameState.cpp" />
     <ClCompile Include="..\PerfectGameClient\UdpSocket.cpp" />
     <ClCompile Include="..\PerfectGameServer\UdpListener.cpp" />
     <ClCompile Include="main.cpp" />
