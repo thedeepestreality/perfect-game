@@ -3,6 +3,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <tchar.h>
+#include <memory>
 
 class UdpSocket
 {
@@ -18,10 +19,16 @@ private:
     UdpSocket();
 
 public:
-    UdpSocket(std::string const& ip_addr, u_short port);
+    // client constructor
+    UdpSocket(std::string const& ip_addr_to, u_short port_to);
+    // listener constructor
+    UdpSocket(u_short port_from);
     UdpSocket(sockaddr_in const& addr_info);
     UdpSocket(UdpSocket const& sock);
     ~UdpSocket();
+    int recv(char* result, size_t& sz, std::unique_ptr<UdpSocket>& from);
     int recv(char* result, size_t& sz);
     int send(char const* msg, size_t sz);
+    //int recv(std::string& result, UdpSocket& from);
+    
 };

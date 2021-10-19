@@ -3,6 +3,7 @@
 */
 #include <iostream>
 #include <memory>
+#include <chrono>
 #include "UdpSocket.h"
 #include "../GameState/GameState.h"
 
@@ -15,6 +16,18 @@ std::string const kIpAddr = "127.0.0.1";
 u_short const kPort = 8888;
 size_t const kBufferSize = 512;
 char buffer[kBufferSize];
+
+void sleep(unsigned long us)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+	auto finish = std::chrono::high_resolution_clock::now();
+	auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
+	while (microseconds.count() < us)
+	{
+		finish = std::chrono::high_resolution_clock::now();
+		microseconds = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
+	}
+}
 
 int main()
 {
@@ -47,8 +60,10 @@ int main()
 		size_t sz = kBufferSize;
 		if (sock_ptr->recv(buffer, sz) != 0)
 		{
-			std::cout << "Failed to recv\n";
-			exit(EXIT_FAILURE);
+			std::cout << "No data to recv\n";
+			sleep(1e6);
+			continue;
+			//exit(EXIT_FAILURE);
 		}
 
 		std::cout << "Received game state: " << sz << "\n";

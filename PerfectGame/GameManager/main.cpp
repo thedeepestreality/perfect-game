@@ -1,7 +1,6 @@
 #include <iostream>
 #include <chrono>
 #include "..\GameState\GameState.h"
-#include "..\PerfectGameServer\UdpListener.h"
 #include "..\PerfectGameClient\UdpSocket.h"
 
 // Winsock Library
@@ -31,12 +30,12 @@ int main()
 {
     GameState game;
     
-	std::unique_ptr<UdpListener> sock_listen;
+	std::unique_ptr<UdpSocket> sock_listen;
 	std::string message;
-
+	size_t sz = kBufSize;
 	try
 	{
-		sock_listen = std::make_unique<UdpListener>(kIpAddr, kPort);
+		sock_listen = std::make_unique<UdpSocket>(kPort);
 	}
 	catch (std::exception const& err)
 	{
@@ -52,7 +51,13 @@ int main()
 		std::cout << "\nWaiting for data...\n";
 		try
 		{
-			sock = std::make_unique<UdpSocket>(sock_listen->recv(player_name));
+			sz = kBufSize;
+			int res = sock_listen->recv(buf, sz, sock);
+			if (res != 0)
+				throw std::runtime_error(std::string("error ") + std::to_string(WSAGetLastError()));
+			if (sz == 0)
+				throw std::runtime_error("recv nothing");
+			player_name = std::string(buf);
 			std::cout << "Received data : " << player_name << "\n";
 			game.setPlayerPos(player_name, GameState::PlayerPos(1, 1));
 			break;
@@ -67,7 +72,7 @@ int main()
 
 	while(1)
 	{
-		size_t sz = kBufSize;
+		sz = kBufSize;
 		game.serialize(buf, sz);
 		// now reply the client with the same data
 		if (sock->send(buf, sz) != 0)
@@ -79,8 +84,8 @@ int main()
 		try
 		{
 			sz = kBufSize;
-			sock = std::make_unique<UdpSocket>(sock_listen->recv(buf, sz));
-			std::cout << "Received data : " << player_name << "\n";
+			sock_listen->recv(buf, sz, sock);
+			std::cout << "Received game data \n";
 		}
 		catch (std::exception const& err)
 		{
