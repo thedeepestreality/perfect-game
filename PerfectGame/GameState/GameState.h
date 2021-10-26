@@ -13,6 +13,7 @@ private:
     std::vector<std::vector<Block> > _map;
     GameIdx _rows;
     GameIdx _cols;
+    ///TODO: map of Player objects?
     std::unordered_map<std::string, std::pair<GameIdx, GameIdx> > _players;
 public:
     GameState(std::string const& config_file_name) {}
