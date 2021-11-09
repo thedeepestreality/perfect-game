@@ -77,7 +77,7 @@ int UdpSocket::send(char const* msg, size_t sz)
 	return 0;
 }
 
-int UdpSocket::recv(char* result, size_t& sz, std::unique_ptr<UdpSocket>& from)
+int UdpSocket::recv(char* result, size_t& sz, std::shared_ptr<UdpSocket>& from)
 {
 	//memset(_buffer, '\0', _kBufferSize);
 	memset(result, '\0', sz);
@@ -85,6 +85,6 @@ int UdpSocket::recv(char* result, size_t& sz, std::unique_ptr<UdpSocket>& from)
 	//try to receive some data, this is a blocking call
 	if ((sz = recvfrom(_socket, result, sz, 0, (sockaddr*)&recv_addr, &_addr_sz)) == SOCKET_ERROR)
 		return WSAGetLastError();
-	from = std::make_unique<UdpSocket>(recv_addr);
+	from = std::make_shared<UdpSocket>(recv_addr);
 	return 0;
 }

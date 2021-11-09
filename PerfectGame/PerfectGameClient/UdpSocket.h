@@ -26,7 +26,7 @@ public:
     UdpSocket(sockaddr_in const& addr_info);
     UdpSocket(UdpSocket const& sock);
     ~UdpSocket();
-    int recv(char* result, size_t& sz, std::unique_ptr<UdpSocket>& from);
+    int recv(char* result, size_t& sz, std::shared_ptr<UdpSocket>& from);
     int recv(char* result, size_t& sz);
     int send(char const* msg, size_t sz);
     //int recv(std::string& result, UdpSocket& from);

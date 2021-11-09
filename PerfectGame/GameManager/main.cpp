@@ -14,6 +14,9 @@ std::string const kIpAddr = "127.0.0.1";
 // The port on which to listen for incoming data
 size_t const kPort = 8888;
 
+GameState::GameIdx kDefX = 0;
+GameState::GameIdx kDefY = 0;
+
 void sleep(unsigned long us)
 {
 	auto start = std::chrono::high_resolution_clock::now();
@@ -44,64 +47,48 @@ int main()
 	}
 	std::cout << "Bind done\n";
 	std::string player_name;
-	std::unique_ptr<UdpSocket> sock;
-	// keep listening for data
+	std::shared_ptr<UdpSocket> sock;
+	// game cycle
 	while (1)
 	{
-		std::cout << "\nWaiting for data...\n";
-		try
+		game.incrementAll();
+		while(wait_delay)
 		{
-			sz = kBufSize;
-			int res = sock_listen->recv(buf, sz, sock);
-			if (res != 0)
-				throw std::runtime_error(std::string("error ") + std::to_string(WSAGetLastError()));
-			if (sz == 0)
-				throw std::runtime_error("recv nothing");
-			player_name = std::string(buf);
-			std::cout << "Received data : " << player_name << "\n";
-			game.setPlayerPos(player_name, GameState::PlayerPos(1, 1));
-			break;
+			try
+			{
+				sz = kBufSize;
+				int res = sock_listen->recv(buf, sz, sock);
+				if (res != 0)
+					throw std::runtime_error(std::string("error ") + std::to_string(WSAGetLastError()));
+				if (sz == 0)
+					throw std::runtime_error("recv nothing");
+				player_name = std::string(buf);
+				std::cout << "Received data : " << player_name << "\n";
+				Player* player_ptr;
+				//TODO: what about socket if player re-enter
+				if (!game.getPlayer(player_name, player_ptr))
+					game.addPlayer(player_name, sock, kDefX, kDefY);
+				else
+				{
+					if (player_ptr->getStatus() == PlayerStatus::NotActive)
+						player_ptr->activate();
+					else
+					{
+						player_ptr->resetLossCounter();
+						size_t str_sz = player_name.length();
+						GameState::GameIdx x = buf[str_sz + 1];
+						GameState::GameIdx y = buf[str_sz + 2];
+						player_ptr->updatePos(x, y);
+					}
+				}
+				break;
+			}
+			catch (std::exception const& err)
+			{
+				std::cout << "Socket recv error : " << err.what() << "\n";
+			}
 		}
-		catch (std::exception const& err)
-		{
-			std::cout << "Socket recv error : " << err.what() << "\n";
-			//exit(EXIT_FAILURE);
-		}
-		sleep(1e6);
-	}
-
-	while(1)
-	{
-		sz = kBufSize;
-		game.serialize(buf, sz);
-		// now reply the client with the same data
-		if (sock->send(buf, sz) != 0)
-		{
-			std::cout << "Failed to send\n";
-			exit(EXIT_FAILURE);
-		}
-
-		try
-		{
-			sz = kBufSize;
-			sock_listen->recv(buf, sz, sock);
-			std::cout << "Received game data \n";
-		}
-		catch (std::exception const& err)
-		{
-			std::cout << "Socket recv error : " << err.what() << "\n";
-			continue;
-			//exit(EXIT_FAILURE);
-		}
-		if (sz > 0)
-		{
-			player_name = std::string(buf);
-			size_t str_sz = player_name.length();
-			GameState::GameIdx player_x = buf[str_sz + 1];
-			GameState::GameIdx player_y = buf[str_sz + 2];
-			game.setPlayerPos(player_name, GameState::PlayerPos(player_x, player_y));
-		}
-		sleep(1e6);
+		game.sendAll();
 	}
 
     return 0;

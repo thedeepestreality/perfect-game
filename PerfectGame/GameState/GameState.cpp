@@ -8,14 +8,6 @@ GameState::GameState() : _rows(4), _cols(8)
     _map.push_back(bg_layer);
     _map.push_back(gr_layer);
     _map.push_back(gr_layer);
-
-    _players["player"] = PlayerPos(1, 0);
-    _players["gamer"] = PlayerPos(2, 3);
-}
-
-void GameState::setPlayerPos(std::string const& name, PlayerPos const& pos)
-{
-    _players[name] = pos;
 }
 
 bool GameState::serialize(char* buffer, size_t& sz)
@@ -40,14 +32,12 @@ bool GameState::serialize(char* buffer, size_t& sz)
         for (GameIdx col = 0; col < _cols; ++col)
             buffer[out_idx++] = (char)_map[row][col];
     buffer[out_idx++] = _players.size();
-    for (auto& playerPos : _players)
+    size_t ser_player_sz;
+    for (auto& map_pair : _players)
     {
-        char const* c_id = playerPos.first.c_str();
-        size_t const str_size = playerPos.first.size();
-        strcpy_s(buffer + out_idx, str_size + 1, c_id);
-        out_idx += str_size + 1;
-        buffer[out_idx++] = playerPos.second.first;
-        buffer[out_idx++] = playerPos.second.second;
+        auto const& player = map_pair.second;
+        player.serialize(buffer + out_idx, ser_player_sz);
+        out_idx += ser_player_sz;
     }
     return true;
 }
@@ -62,6 +52,7 @@ bool GameState::deserialize(char const* buffer, size_t const kSize)
             _map[row][col] = (Block)buffer[in_idx++];
     GameIdx const kPlayerSz = buffer[in_idx++];
     _players.clear();
+    // TODO: what to do with sockets?
     for (GameIdx idx = 0; idx < kPlayerSz; ++idx)
     {
         std::string const kPlayerId(buffer + in_idx);
@@ -74,12 +65,44 @@ bool GameState::deserialize(char const* buffer, size_t const kSize)
     return true;
 }
 
-bool GameState::serialize_player(char* buffer, size_t& sz, std::string const& name, PlayerPos const& pos)
+void GameState::addPlayer(std::string const& name, std::shared_ptr<UdpSocket>&& sock, GameState::GameIdx x, GameState::GameIdx y)
 {
-    size_t ser_idx = name.length() + 1;
-    strcpy_s(buffer, ser_idx, name.c_str());
-    buffer[ser_idx++] = pos.first;
-    buffer[ser_idx++] = pos.second;
-    sz = ser_idx;
+    _players.emplace(
+        std::make_pair(
+            name,
+            Player(name, sock, x, y)
+        )
+    );
+}
+
+bool GameState::getPlayer(std::string const& name, Player* out)
+{
+    auto player_itr = _players.find(name);
+    if (player_itr == _players.end())
+        return false;
+    out = &(player_itr->second);
     return true;
+}
+
+void GameState::incrementAll()
+{
+    for (auto& map_pair : _players)
+    {
+        auto& player = map_pair.second;
+        player.incrementLossCounter();
+    }
+}
+
+void GameState::sendAll()
+{
+    static size_t const kBufSize = 512;
+    static char buf[kBufSize];
+    size_t fact_sz;
+    serialize(buf, fact_sz);
+    for (auto& map_pair : _players)
+    {
+        auto& player = map_pair.second;
+        if (player.getStatus() != PlayerStatus::NotActive)
+            player.send(buf, fact_sz);
+    }
 }

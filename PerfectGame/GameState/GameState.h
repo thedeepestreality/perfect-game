@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include "Player.h"
 
 class GameState
 {
@@ -14,14 +15,19 @@ private:
     GameIdx _rows;
     GameIdx _cols;
     ///TODO: map of Player objects?
-    std::unordered_map<std::string, std::pair<GameIdx, GameIdx> > _players;
+    //std::unordered_map<std::string, std::pair<GameIdx, GameIdx> > _players;
+    std::unordered_map<std::string, Player> _players;
 public:
     GameState(std::string const& config_file_name) {}
     GameState();
 
-    void setPlayerPos(std::string const& name, PlayerPos const& pos);
-    PlayerPos getPlayerPos(std::string const& name){return _players[name];}
     bool serialize(char* buffer, size_t& sz);
     bool deserialize(char const* buffer, size_t const kSize);
-    bool serialize_player(char* buffer, size_t& sz, std::string const& name, PlayerPos const& pos);
+    void addPlayer( std::string const& name,
+                    std::shared_ptr<UdpSocket> sock,
+                    GameState::GameIdx x,
+                    GameState::GameIdx y);
+    bool getPlayer(std::string const& name, Player* out);
+    void incrementAll();
+    void sendAll();
 };
