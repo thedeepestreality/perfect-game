@@ -5,10 +5,7 @@
 #include "Player.h"
 
 class GameState
-{
-public:
-    typedef unsigned char GameIdx;
-    typedef std::pair<GameIdx, GameIdx> PlayerPos;
+{  
 private:
     enum class Block {Ground = 0, Background = 1};
     std::vector<std::vector<Block> > _map;
@@ -25,9 +22,9 @@ public:
     bool deserialize(char const* buffer, size_t const kSize);
     void addPlayer( std::string const& name,
                     std::shared_ptr<UdpSocket> sock,
-                    GameState::GameIdx x,
-                    GameState::GameIdx y);
-    bool getPlayer(std::string const& name, Player* out);
+                    GameIdx x,
+                    GameIdx y);
+    Player* getPlayer(std::string const& name);
     void incrementAll();
     void sendAll();
 };

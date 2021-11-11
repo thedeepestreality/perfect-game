@@ -52,7 +52,6 @@ bool GameState::deserialize(char const* buffer, size_t const kSize)
             _map[row][col] = (Block)buffer[in_idx++];
     GameIdx const kPlayerSz = buffer[in_idx++];
     _players.clear();
-    // TODO: what to do with sockets?
     for (GameIdx idx = 0; idx < kPlayerSz; ++idx)
     {
         std::string const kPlayerId(buffer + in_idx);
@@ -60,12 +59,17 @@ bool GameState::deserialize(char const* buffer, size_t const kSize)
         in_idx += kStrSz;
         GameIdx const kX = buffer[in_idx++];
         GameIdx const kY = buffer[in_idx++];
-        _players[kPlayerId] = PlayerPos(kX, kY);
+        _players.emplace(
+            std::make_pair(
+                kPlayerId,
+                Player(kPlayerId, kX, kY)
+            )
+        );
     }
     return true;
 }
 
-void GameState::addPlayer(std::string const& name, std::shared_ptr<UdpSocket>&& sock, GameState::GameIdx x, GameState::GameIdx y)
+void GameState::addPlayer(std::string const& name, std::shared_ptr<UdpSocket> sock, GameIdx x, GameIdx y)
 {
     _players.emplace(
         std::make_pair(
@@ -75,13 +79,12 @@ void GameState::addPlayer(std::string const& name, std::shared_ptr<UdpSocket>&& 
     );
 }
 
-bool GameState::getPlayer(std::string const& name, Player* out)
+Player* GameState::getPlayer(std::string const& name)
 {
     auto player_itr = _players.find(name);
     if (player_itr == _players.end())
-        return false;
-    out = &(player_itr->second);
-    return true;
+        return nullptr;
+    return &(player_itr->second);
 }
 
 void GameState::incrementAll()

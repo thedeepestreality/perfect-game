@@ -1,33 +1,40 @@
 #pragma once
 #include <memory>
 #include "..\PerfectGameClient\UdpSocket.h"
-#include "GameState.h"
 
 enum class PlayerStatus { Active, NotActive };
+typedef unsigned char GameIdx;
+typedef std::pair<GameIdx, GameIdx> PlayerPos;
 
 class Player
 {
 private:
     const size_t kLossThreshold = 10;
     std::string const _name;
-    GameState::GameIdx _x;
-    GameState::GameIdx _y;
+    GameIdx _x;
+    GameIdx _y;
     size_t _loss_counter;
     PlayerStatus _status;
 public:
     std::shared_ptr<UdpSocket> _sock;
 
     Player( std::string const& name,
-            std::shared_ptr<UdpSocket> sock,
-            GameState::GameIdx x,
-            GameState::GameIdx y) : _name(name),
-                                    _sock(sock),
+            GameIdx x,
+            GameIdx y) : _name(name),
                                     _x(x),
                                     _y(y),
                                     _loss_counter(0),
                                     _status(PlayerStatus::Active) {}
 
-    void updatePos(GameState::GameIdx x, GameState::GameIdx y)
+    Player( std::string const& name,
+            std::shared_ptr<UdpSocket> sock,
+            GameIdx x,
+            GameIdx y) : Player(name, x, y) 
+    {
+        _sock = sock;
+    }
+
+    void updatePos(GameIdx x, GameIdx y)
     {
         _x = x;
         _y = y;
@@ -69,8 +76,18 @@ public:
         _status = PlayerStatus::Active;
     }
     
-    void send(char* buf, size_t sz)
+    void send(const char* buf, size_t sz)
     {
         _sock->send(buf, sz);
+    }
+
+    PlayerPos getPos()
+    {
+        return std::make_pair(_x, _y);
+    }
+
+    std::string getName()
+    {
+        return _name;
     }
 };

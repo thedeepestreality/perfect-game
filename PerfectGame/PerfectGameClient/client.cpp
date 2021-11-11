@@ -7,9 +7,6 @@
 #include "UdpSocket.h"
 #include "../GameState/GameState.h"
 
-//Winsock Library
-#pragma comment(lib,"ws2_32.lib")
-
 //ip address of udp server
 std::string const kIpAddr = "127.0.0.1";
 //The port on which to listen for incoming data
@@ -29,10 +26,10 @@ void sleep(unsigned long us)
 	}
 }
 
-int main()
+int main(int argc, const char* argv[])
 {
 	std::unique_ptr<UdpSocket> sock_ptr;
-	std::string name = "ping";
+	std::string name = argv[1];
 	GameState state;
 
 	try
@@ -61,19 +58,21 @@ int main()
 		if (sock_ptr->recv(buffer, sz) != 0)
 		{
 			std::cout << "No data to recv\n";
-			sleep(1e6);
+			sleep(1e5);
 			continue;
 			//exit(EXIT_FAILURE);
 		}
 
 		std::cout << "Received game state: " << sz << "\n";
 		state.deserialize(buffer, sz);
-		GameState::PlayerPos curr_pos = state.getPlayerPos(name);
+		Player* p = state.getPlayer(name);
+		PlayerPos curr_pos = p->getPos();
 		std::cout << "Received player pos: (";
 		std::cout << (int)curr_pos.first << "," << (int)curr_pos.second << ")\n";
 		++curr_pos.second;
+		p->updatePos(curr_pos.first, curr_pos.second);
 		sz = kBufferSize;
-		state.serialize_player(buffer, sz, name, curr_pos);
+		p->serialize(buffer, sz);
 
 		if (sock_ptr->send(buffer, sz) != 0)
 		{

@@ -14,8 +14,8 @@ std::string const kIpAddr = "127.0.0.1";
 // The port on which to listen for incoming data
 size_t const kPort = 8888;
 
-GameState::GameIdx kDefX = 0;
-GameState::GameIdx kDefY = 0;
+GameIdx kDefX = 0;
+GameIdx kDefY = 0;
 
 void sleep(unsigned long us)
 {
@@ -28,6 +28,15 @@ void sleep(unsigned long us)
 		microseconds = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
 	}
 }
+
+unsigned long elapsed_ms(std::chrono::steady_clock::time_point start)
+{
+	auto curr = std::chrono::high_resolution_clock::now();
+	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(curr - start);
+	return diff.count();
+}
+
+unsigned long const kPeriod = 100; //ms
 
 int main()
 {
@@ -52,21 +61,27 @@ int main()
 	while (1)
 	{
 		game.incrementAll();
-		while(wait_delay)
+		auto start = std::chrono::high_resolution_clock::now();
+		while(elapsed_ms(start) < kPeriod)
 		{
 			try
 			{
 				sz = kBufSize;
 				int res = sock_listen->recv(buf, sz, sock);
 				if (res != 0)
-					throw std::runtime_error(std::string("error ") + std::to_string(WSAGetLastError()));
-				if (sz == 0)
-					throw std::runtime_error("recv nothing");
+				{
+					//recv nothing
+					if (res == 10035)
+						continue;
+					//smth serious happend
+					else
+						throw std::runtime_error(std::string("error ") + std::to_string(res));
+				}
 				player_name = std::string(buf);
 				std::cout << "Received data : " << player_name << "\n";
 				Player* player_ptr;
-				//TODO: what about socket if player re-enter
-				if (!game.getPlayer(player_name, player_ptr))
+				//TODO: what about socket if player re-enters
+				if ((player_ptr = game.getPlayer(player_name)) == nullptr)
 					game.addPlayer(player_name, sock, kDefX, kDefY);
 				else
 				{
@@ -76,8 +91,8 @@ int main()
 					{
 						player_ptr->resetLossCounter();
 						size_t str_sz = player_name.length();
-						GameState::GameIdx x = buf[str_sz + 1];
-						GameState::GameIdx y = buf[str_sz + 2];
+						GameIdx x = buf[str_sz + 1];
+						GameIdx y = buf[str_sz + 2];
 						player_ptr->updatePos(x, y);
 					}
 				}

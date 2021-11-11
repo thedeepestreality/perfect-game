@@ -5,6 +5,9 @@
 #include <tchar.h>
 #include <memory>
 
+//Winsock Library
+#pragma comment(lib,"ws2_32.lib")
+
 class UdpSocket
 {
 private:
