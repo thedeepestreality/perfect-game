@@ -6,8 +6,9 @@
 
 class GameState
 {  
+public:
+    enum class Block { Background = 0, Ground = 1 };
 private:
-    enum class Block {Ground = 0, Background = 1};
     std::vector<std::vector<Block> > _map;
     GameIdx _rows;
     GameIdx _cols;
@@ -27,4 +28,5 @@ public:
     Player* getPlayer(std::string const& name);
     void incrementAll();
     void sendAll();
+    void updateMap(GameIdx x, GameIdx y, Block block);
 };

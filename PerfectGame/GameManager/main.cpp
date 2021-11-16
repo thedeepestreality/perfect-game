@@ -94,6 +94,12 @@ int main()
 						GameIdx x = buf[str_sz + 1];
 						GameIdx y = buf[str_sz + 2];
 						player_ptr->updatePos(x, y);
+						if (sz > str_sz + 3)
+						{
+							x = buf[str_sz + 3];
+							y = buf[str_sz + 4];
+							GameState::Block block = (GameState::Block)buf[str_sz + 5];
+						}
 					}
 				}
 				break;

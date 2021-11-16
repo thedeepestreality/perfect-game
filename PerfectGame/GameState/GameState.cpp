@@ -109,3 +109,8 @@ void GameState::sendAll()
             player.send(buf, fact_sz);
     }
 }
+
+void GameState::updateMap(GameIdx x, GameIdx y, Block block)
+{
+    _map[x][y] = block;
+}
